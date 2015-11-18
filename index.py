@@ -1,4 +1,8 @@
 import glob
 
 #get files from FILES directory
-print glob.glob("files/*.fbx")
+found_files = glob.glob("files/*.fbx")
+for found_file in found_files:
+    print found_file
+
+#process each file in FBX SDK

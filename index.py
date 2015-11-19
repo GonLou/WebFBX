@@ -6,6 +6,7 @@ import fbx
 import Image
 import sys
 
+#temporary variables
 path = "C:\Python27\Scripts\WebFbx"
 tmp_file_path = "files\PG.FBX";
 
@@ -68,3 +69,17 @@ f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
 f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
 f.write(et.tostring(doc))
 f.close()
+
+########################################
+#shows up in HTML page
+########################################
+thumbs = glob.glob('thumbnails/*.svg')
+
+with document(title='Thumbnails') as doc:
+    h1('Thumbnails')
+    for path in thumbs:
+        #<svg height="150" version="1.1" width="150" xmlns="http://www.w3.org/2000/svg"><circle cx="75" cy="75" fill="rgb(20, 255, 177)" r="70" /><text fill="white" style="font-family:Courier;font-size:18px;text-anchor:middle;dominant-baseline:top" x="75" y="75">no image</text></svg>
+        div(img(src=path), _class='thumbnails')
+
+with open('gallery.html', 'w') as f:
+    f.write(doc.render())

@@ -1,0 +1,55 @@
+Created on 29 Nov 2015
+
+@author: Amit Patel
+'''
+
+import FbxCommon
+from fbx import *
+import fbx
+import sys
+import math
+import sys
+import webbrowser
+import glob, os
+from xml.etree import ElementTree as et
+
+'''filepath =''' 
+
+print('this is an example of print')
+
+'''manager = fbx.FbxManager.Create()'''
+
+'''newFile = open ("teapot.fbx", 'wb')
+    newFile.write(teapot);
+    newFile.close()'''
+def InitializeSdkObjects():
+    # The first thing to do is to create the FBX SDK manager which is the 
+    # object allocator for almost all the classes in the SDK.
+    lSdkManager = FbxManager.Create()
+    if not lSdkManager:
+        sys.exit(0)
+        
+    # Create an IOSettings object
+    ios = FbxIOSettings.Create(lSdkManager, IOSROOT)
+    lSdkManager.SetIOSettings(ios)
+    
+    # Create the entity that will hold the scene.
+    lScene = FbxScene.Create(lSdkManager, "")
+    
+    return (lSdkManager, lScene)
+ 
+    
+scene=FbxCommon.InitializeSdkObjects()
+'''converter = fbx.FbxGeometryConverter(sdk_manager)'''
+
+manager = fbx.FbxManager.Create()
+importer = fbx.FbxImporter.Create(manager, 'myImporter')
+fbxScene = fbx.FbxScene.Create( manager, 'myScene')
+importer.Import(fbxScene)
+importer.Destroy()
+root = fbxScene.GetRootNode()
+'''mesh = node.GetMesh()'''
+path = s.path 
+
+
+'''node=scene.GetRootNode()

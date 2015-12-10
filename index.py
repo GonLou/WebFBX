@@ -1,14 +1,38 @@
 import glob
 from dominate import document
 from dominate.tags import *
+
 from xml.etree import ElementTree as et
+
 import fbx
-import Image
+import FbxCommon
+from PIL import Image
 import sys
+
+def DisplayControlsPoints(pMesh):
+    lControlPointsCount = pMesh.GetControlPointsCount()
+    lControlPoints = pMesh.GetControlPoints()
+
+    print ("    Control Points")
+
+    for i in range(lControlPointsCount):
+        print("        Control Point %i" % i)
+        print("            Coordinates: %s" % lControlPoints[i])
+
+        for j in range(pMesh.GetLayerCount()):
+            leNormals = pMesh.GetLayer(j).GetNormals()
+            if leNormals:
+                if leNormals.GetMappingMode() == fbx.FbxLayerElement.eByControlPoint:
+                    header = "            Normal Vector (on layer %d): " % j
+                    if leNormals.GetReferenceMode() == fbx.FbxLayerElement.eDirect:
+                        print(header, leNormals.GetDirectArray().GetAt(i))
+        print("")
 
 #temporary variables
 path = "C:\Python27\Scripts\WebFbx"
-tmp_file_path = "files\PG.FBX";
+tmp_file_path = "files\cube.FBX";
+#tmp_file_path = "files\bat.fbx";
+#end temporary variables
 
 ########################################
 #get files from FILES directory
@@ -46,10 +70,48 @@ print("INFO: number of geometries = %i" % scene.GetGeometryCount())
 for i in range(node.GetChildCount()):
     print("INFO: number of child from node = %i" % node.GetChildCount())
     child = node.GetChild(i)
-    attr_type = child.GetNodeAttribute().GetAttributeType()
 
-    if attr_type == fbx.FbxNodeAttribute.eMesh:
+    if child.GetNodeAttribute().GetAttributeType() == fbx.FbxNodeAttribute.eMesh:
         print("INFO: child = %s" % child)
+        mesh = child.GetNodeAttribute()
+        #i = lmesh.GetControlPointsCount()
+        DisplayControlsPoints(mesh)
+
+
+
+#NEW NEW NEW
+# mySdkManager, myScene = FbxCommon.InitializeSdkObjects()
+# myResult = FbxCommon.LoadScene(mySdkManager, myScene, tmp_file_path)
+
+sceneInfo = scene.GetSceneInfo()
+if sceneInfo:
+    print("INFO: Title = %s" % sceneInfo.mTitle.Buffer())
+    print("INFO: Subject = %s" % sceneInfo.mSubject.Buffer())
+    print("INFO: Author = %s" % sceneInfo.mAuthor.Buffer())
+    print("INFO: Keywords = %s" % sceneInfo.mKeywords.Buffer())
+    print("INFO: Revision = %s" % sceneInfo.mRevision.Buffer())
+    print("INFO: Comment = %s" % sceneInfo.mComment.Buffer())
+
+    thumbnail = sceneInfo.GetSceneThumbnail()
+    if thumbnail:
+        print("INFO: Thumbnail = yes")
+    else:
+        print("INFO: Thumbnail = no")
+else:
+    print ("WARNING: no model information")
+
+# if node:
+#     for i in range(node.GetChildCount()):
+#         node.GetChild(i)
+#         mesh = node.GetNodeAttribute ()
+#         if mesh == None:
+#             print("WARNING: NULL Node Attribute\n")
+#         else:
+#             #lAttributeType = (pNode.GetNodeAttribute().GetAttributeType())
+#             #if myNode.GetNodeAttribute().GetAttributeType() == FbxNodeAttribute.eMesh:
+#             DisplayControlsPoints(mesh)
+
+# END NEW END NEW
 
 ########################################
 # render to image
@@ -71,7 +133,7 @@ f.write(et.tostring(doc))
 f.close()
 
 ########################################
-#shows up in HTML page
+#shows up in HTML page reading it from thumbnails directory
 ########################################
 thumbs = glob.glob('thumbnails/*.svg')
 

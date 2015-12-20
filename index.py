@@ -9,33 +9,35 @@ import FbxCommon
 from PIL import Image
 import sys
 
+
+########################################
+# extract vectors
+########################################
 def DisplayControlsPoints(pMesh):
     lControlPointsCount = pMesh.GetControlPointsCount()
     lControlPoints = pMesh.GetControlPoints()
 
     print ("    Control Points")
-
+    SVGline = ""
     for i in range(lControlPointsCount):
         print("        Control Point %i" % i)
-        print("            Coordinates: %s" % lControlPoints[i])
+        print("            Coordinates X: %s" % lControlPoints[i][0])
+        print("            Coordinates Y: %s" % lControlPoints[i][1])
+        print("            Coordinates Z: %s" % lControlPoints[i][2])
+        if i < lControlPointsCount-1 :
+            SVGline = SVGline + str(lControlPoints[i][0]) + "," + str(lControlPoints[i][1]) + ","
 
-        for j in range(pMesh.GetLayerCount()):
-            leNormals = pMesh.GetLayer(j).GetNormals()
-            if leNormals:
-                if leNormals.GetMappingMode() == fbx.FbxLayerElement.eByControlPoint:
-                    header = "            Normal Vector (on layer %d): " % j
-                    if leNormals.GetReferenceMode() == fbx.FbxLayerElement.eDirect:
-                        print(header, leNormals.GetDirectArray().GetAt(i))
-        print("")
+    return SVGline[:-1]
 
 #temporary variables
 path = "C:\Python27\Scripts\WebFbx"
+#/C:/Python27/Scripts/WebFbx/thumbnails/sample.svg
 tmp_file_path = "files\cube.FBX";
 #tmp_file_path = "files\bat.fbx";
 #end temporary variables
 
 ########################################
-#get files from FILES directory
+# get files from FILES directory
 ########################################
 found_files = glob.glob("files/*.fbx")
 for found_file in found_files:
@@ -43,7 +45,7 @@ for found_file in found_files:
     #tmp_file_path = found_file #process each file in FBX SDK
 
 ########################################
-#just doing one file to see how it goes, later will put it on function
+# just doing one file to see how it goes, later will put it on function
 ########################################
 
 #creating instance (acess to C++ SDK) with a custom name
@@ -75,14 +77,10 @@ for i in range(node.GetChildCount()):
         print("INFO: child = %s" % child)
         mesh = child.GetNodeAttribute()
         #i = lmesh.GetControlPointsCount()
-        DisplayControlsPoints(mesh)
+        SVGline = DisplayControlsPoints(mesh)
 
 
-
-#NEW NEW NEW
-# mySdkManager, myScene = FbxCommon.InitializeSdkObjects()
-# myResult = FbxCommon.LoadScene(mySdkManager, myScene, tmp_file_path)
-
+# General file information
 sceneInfo = scene.GetSceneInfo()
 if sceneInfo:
     print("INFO: Title = %s" % sceneInfo.mTitle.Buffer())
@@ -100,37 +98,43 @@ if sceneInfo:
 else:
     print ("WARNING: no model information")
 
-# if node:
-#     for i in range(node.GetChildCount()):
-#         node.GetChild(i)
-#         mesh = node.GetNodeAttribute ()
-#         if mesh == None:
-#             print("WARNING: NULL Node Attribute\n")
-#         else:
-#             #lAttributeType = (pNode.GetNodeAttribute().GetAttributeType())
-#             #if myNode.GetNodeAttribute().GetAttributeType() == FbxNodeAttribute.eMesh:
-#             DisplayControlsPoints(mesh)
-
-# END NEW END NEW
 
 ########################################
 # render to image
 ########################################
+# create an empty SVG XML element
+def DrawEmptySVG():
+    # create an empty SVG XML element
+    doc = et.Element('svg', width='150', height='150', version='1.1', xmlns='http://www.w3.org/2000/svg')
+    # add a circle (using the SubElement function)
+    et.SubElement(doc, 'circle', cx='75', cy='75', r='70', fill='rgb(20, 255, 177)')
+    # add text
+    text = et.Element('text', x='75', y='75', fill='white', style='font-family:Courier;font-size:18px;text-anchor:middle;dominant-baseline:top')
+    print SVGline
+    text.text = 'no image'
+    doc.append(text)
+    # ElementTree 1.2 doesn't write the SVG file header errata, so do that manually
+    f = open('thumbnails/sample.svg', 'w')
+    f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
+    f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
+    f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
+    f.write(et.tostring(doc))
+    f.close()
+
 # create an SVG XML element
-doc = et.Element('svg', width='150', height='150', version='1.1', xmlns='http://www.w3.org/2000/svg')
-# add a circle (using the SubElement function)
-et.SubElement(doc, 'circle', cx='75', cy='75', r='70', fill='rgb(20, 255, 177)')
-# add text
-text = et.Element('text', x='75', y='75', fill='white', style='font-family:Courier;font-size:18px;text-anchor:middle;dominant-baseline:top')
-text.text = 'no image'
-doc.append(text)
-# ElementTree 1.2 doesn't write the SVG file header errata, so do that manually
-f = open('thumbnails/sample.svg', 'w')
-f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
-f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
-f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
-f.write(et.tostring(doc))
-f.close()
+def DrawSVG(SVGline):
+    f = open('thumbnails/sample.svg', 'w')
+    f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
+    f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
+    f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
+    f.write('<svg height=\"150\" version=\"1.1\" width=\"150\" xmlns=\"http://www.w3.org/2000/svg\">\n')
+    f.write('<polygon points=\"'+SVGline+'\" style=\"fill:none; stroke:#00C; stroke-width:1.5px\"/>\n')
+    f.write('</svg>')
+    f.close()
+
+
+DrawSVG(SVGline)
+#DrawEmptySVG()
 
 ########################################
 #shows up in HTML page reading it from thumbnails directory
@@ -140,7 +144,6 @@ thumbs = glob.glob('thumbnails/*.svg')
 with document(title='Thumbnails') as doc:
     h1('Thumbnails')
     for path in thumbs:
-        #<svg height="150" version="1.1" width="150" xmlns="http://www.w3.org/2000/svg"><circle cx="75" cy="75" fill="rgb(20, 255, 177)" r="70" /><text fill="white" style="font-family:Courier;font-size:18px;text-anchor:middle;dominant-baseline:top" x="75" y="75">no image</text></svg>
         div(img(src=path), _class='thumbnails')
 
 with open('gallery.html', 'w') as f:

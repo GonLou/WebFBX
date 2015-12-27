@@ -94,7 +94,8 @@ def RotatingMatrix (x, y, z, angleX, angleY) :
 def DisplayControlsPoints(pMesh):
     lControlPointsCount = pMesh.GetControlPointsCount()
     lControlPoints = pMesh.GetControlPoints()
-    zoom = 1.5
+    zoom = 2.5
+    center = 10.75
     #print ("    Control Points")
     SVGline = ""
     for i in range(lControlPointsCount):
@@ -111,9 +112,9 @@ def DisplayControlsPoints(pMesh):
             #calculating isometric
             m = RotatingMatrix (lControlPoints[i][0], lControlPoints[i][1], lControlPoints[i][2], 45, 35.264)
             if m[0][3] > 0:
-                SVGline = SVGline + str(m[0][0]/m[0][3]*zoom) + "," + str(m[0][1]/m[0][3]*zoom) + ","
+                SVGline = SVGline + str(m[0][0]/m[0][3]*zoom+center) + "," + str(m[0][1]/m[0][3]*zoom+center) + ","
             else:
-                SVGline = SVGline + str(m[0][0]*zoom) + "," + str(m[0][1]*zoom) + ","
+                SVGline = SVGline + str(m[0][0]*zoom+center) + "," + str(m[0][1]*zoom+center) + ","
 
     return SVGline[:-1]
 
@@ -197,13 +198,6 @@ def CreateHTML():
 
     with open('gallery.html', 'w') as f:
         f.write(doc.render())
-
-#temporary variables
-#path = "C:\Python27\Scripts\WebFbx"
-#/C:/Python27/Scripts/WebFbx/thumbnails/sample.svg
-#tmp_file_path = "files\cube.FBX";
-#tmp_file_path = "files\bat.fbx";
-#end temporary variables
 
 #process each FBX file in FILES directory
 found_files = glob.glob("files/*.fbx")

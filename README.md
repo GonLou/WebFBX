@@ -37,16 +37,32 @@ Then is needed to go <your programs folder>/FBX/FBX Python SDK/<your version>/li
 It was used Atom 1.3.2 for its simplicity.
 
 ### 3. Development
-#### 3.i) FBX
-
-#### 3.ii) Files
-
+#### 3.i) Files
+First thing is to read files from folder. Because just FBX files are valid for later import they are automatically filtered with Glob module.
+#### 3.ii) FBX
+As each file is loaded from folder is created an instance with a custom name.
+During the process is checked if file is a valid FBX file. If not a SVG file saying "no image" with a green circle will be attributed to that invalid FBX file.
+For valid formats is possible to get some useful general file information like title, subject, author, keywords,... But for this project purpose just get the node.
+That node represents the first model in the scene from which will be an image displayed.
+To retrieve all coordinates we access GetControlPoints function from FBX SDK.
+At same time theses points are being converted into SVG lines after isometric transformation.
 #### 3.iii) Isometric
-The easiest way to plot 3D Points onto a 2D screen
-$$ \large{ screen.x = x / z * zoom
-screen.y = y / z * zoom }$$
-#### 3.iv) HTML
-
+To obtain an isometric view of the model is needed to perform a rotation in Euclidean space so it reflects same scale along each projection axis.
+Actually isometric projection is a result from two rotations: first rotate on x for 45 degrees and second rotate on y for arctan(1/sqrt(2)).
+This operations is achievable by RotatingMatrix function that performs all math calculus. MatrixDotMatrix function helps doing the cross product between matrices.
+Only after this transformation is possible to convert our 3d coordinates into a 2D image.
+All data retrieved from FBX file are 3d coordinates and is needed to plot it into a 2D image.
+The easiest way to plot 3D Points onto a 2D image is by following formula screen.x = x / z and screen.y = y / z . This will produce the image coordinates of the 3D point.
+Zoom is a way to hack size of model but because models are from different sizes a constant number cannot achieve good results for every models.
+Center was another naif way to hack negative values that was drawing lines outside visible image square. This solution is not working properly due its simple implementation and complex difference between models.
+#### 3.iv) SVG
+All 2d points obtained are processed in a single SVG line using polygon attribute.
+Remaining tags are standard for a SVG file.
+In case of an invalid FBX file or by some reason it can not be read DrawEmptySVG function will create an alternative SVG image.
+#### 3.v) HTML
+To create HTML Glob module is used once more for this time read all SVG files previously created.
+After all files red Dominate library is used to generate a HTML page.
+HTML page composition is quite simple, using a table with three columns, then each row will display name, file path and model image.
 ### 4. Conclusion
 
 ### 5. Internet Resources

@@ -61,11 +61,18 @@ Remaining tags are standard for a SVG file.
 In case of an invalid FBX file or by some reason it can not be read DrawEmptySVG function will create an alternative SVG image.
 #### 3.v) HTML
 To create HTML Glob module is used once more for this time read all SVG files previously created.
-After all files red Dominate library is used to generate a HTML page.
-HTML page composition is quite simple, using a table with three columns, then each row will display name, file path and model image.
+After reading all files Dominate library is used to generate a HTML page.
+Thumbnails HTML page composition is quite simple, using a table with three columns, then each row will display name, file path and correspondent model image.
+
 ### 4. Conclusion
+Python allowed a fast implementation of different application aspects like reading folders and creating webpage.
+But FBX SDK is very poorly studied and even Autodesk own information about it is very scarce.
+Isometric approach need be different in the way to capture all model to fit in image. Could be used a way to verify maximum/minimum XY points on top, left, right and bottom, and from there scale it to image dimensions.
+Also application is running locally, mainly because Virtual Machine evaluation on Google Developers Console was expired already since it was setup on early term.
+Never the less this type of applications are very useful in a game development process because give a lot of flexibility and future ideas to transform models via programming and afterwards upload them into game.
 
 ### 5. Internet Resources
+- http://docs.autodesk.com/FBX/2014/ENU/FBX-SDK-Documentation/index.html
 - https://docs.python.org/2/library/glob.html
 - https://docs.python.org/2/library/xml.etree.elementtree.html
 - https://pypi.python.org/pypi/dominate

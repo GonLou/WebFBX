@@ -6,7 +6,7 @@ from xml.etree import ElementTree as et
 
 import fbx
 import FbxCommon
-from PIL import Image
+#from PIL import Image
 import sys
 import math
 
@@ -114,7 +114,7 @@ def DisplayControlsPoints(pMesh):
                 SVGline = SVGline + str(m[0][0]/m[0][3]*zoom) + "," + str(m[0][1]/m[0][3]*zoom) + ","
             else:
                 SVGline = SVGline + str(m[0][0]*zoom) + "," + str(m[0][1]*zoom) + ","
-            print SVGline
+
     return SVGline[:-1]
 
 ########################################

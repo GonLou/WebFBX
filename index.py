@@ -8,6 +8,7 @@ import fbx
 import FbxCommon
 from PIL import Image
 import sys
+import math
 
 ########################################
 # isolate name of the file without extension and folder
@@ -52,12 +53,48 @@ def DrawSVG(SVGline, fileName):
     f.close()
 
 ########################################
+# dot operation between two matrix
+########################################
+def MatrixDotMatrix (m1, m2) :
+    r = [[ 1, 0, 0, 0],
+         [ 0, 1, 0, 0],
+         [ 0, 0, 1, 0],
+         [ 0, 0, 0, 0]]
+    for i in range(4) :
+        for j in range(4) :
+            r[i][j] = m1[i][0] * m2[0][j] + m1[i][1] * m2[1][j] + m1[i][2] * m2[2][j] + m1[i][3] * m2[3][j];
+    return r
+
+########################################
+# calculating isometric view
+########################################
+def RotatingMatrix (x, y, z, angleX, angleY) :
+
+    result =   [[ x, 0, 0, 0],
+                [ 0, y, 0, 0],
+                [ 0, 0, z, 0],
+                [ 0, 0, 0, 0]]
+
+    xRotationMatrix =  [[ math.cos(angleX), 0, -math.sin(angleX), 0],
+                        [ 0, 1, 0, 0],
+                        [ math.sin(angleX), 0, math.cos(angleX), 0],
+                        [ 0, 0, 0, 0]]
+    result = MatrixDotMatrix(result, xRotationMatrix)
+
+    yRotationMatrix =  [[ 1, 0, 0, 0],
+                        [ 0, math.cos(angleY), math.sin(angleY), 0],
+                        [ 0, -math.sin(angleY), math.cos(angleY), 0],
+                        [ 0, 0, 0, 0]]
+
+    return MatrixDotMatrix(result, yRotationMatrix)
+
+########################################
 # extract vectors
 ########################################
 def DisplayControlsPoints(pMesh):
     lControlPointsCount = pMesh.GetControlPointsCount()
     lControlPoints = pMesh.GetControlPoints()
-    zoom = 0.5
+    zoom = 1.5
     #print ("    Control Points")
     SVGline = ""
     for i in range(lControlPointsCount):
@@ -66,12 +103,18 @@ def DisplayControlsPoints(pMesh):
         #print("            Coordinates Y: %s" % lControlPoints[i][1])
         #print("            Coordinates Z: %s" % lControlPoints[i][2])
         if i < lControlPointsCount-1 :
-            #SVGline = SVGline + str(lControlPoints[i][0]/lControlPoints[i][2]) + "," + str(lControlPoints[i][1]/lControlPoints[i][3]) + ","
-            if lControlPoints[i][3] > 0:
-                SVGline = SVGline + str(lControlPoints[i][0]/lControlPoints[i][2]*zoom) + "," + str(lControlPoints[i][1]/lControlPoints[i][3]*zoom) + ","
-            else:
-                SVGline = SVGline + str(lControlPoints[i][0]*zoom) + "," + str(lControlPoints[i][1]*zoom) + ","
+            # if lControlPoints[i][3] > 0:
+            #     SVGline = SVGline + str(lControlPoints[i][0]/lControlPoints[i][2]*zoom) + "," + str(lControlPoints[i][1]/lControlPoints[i][3]*zoom) + ","
+            # else:
+            #     SVGline = SVGline + str(lControlPoints[i][0]*zoom) + "," + str(lControlPoints[i][1]*zoom) + ","
 
+            #calculating isometric
+            m = RotatingMatrix (lControlPoints[i][0], lControlPoints[i][1], lControlPoints[i][2], 45, 35.264)
+            if m[0][3] > 0:
+                SVGline = SVGline + str(m[0][0]/m[0][3]*zoom) + "," + str(m[0][1]/m[0][3]*zoom) + ","
+            else:
+                SVGline = SVGline + str(m[0][0]*zoom) + "," + str(m[0][1]*zoom) + ","
+            print SVGline
     return SVGline[:-1]
 
 ########################################
@@ -149,7 +192,7 @@ def CreateHTML():
                 with l:
                     l.add(td(SliceFileName(path)))
                     l.add(td(path))
-                    l.add(td(img(src=path)))
+                    l.add(td(img(src=path, border="1")))
                 i=i+1
 
     with open('gallery.html', 'w') as f:

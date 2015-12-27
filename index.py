@@ -9,6 +9,48 @@ import FbxCommon
 from PIL import Image
 import sys
 
+########################################
+# isolate name of the file without extension and folder
+########################################
+def SliceFileName(s1):
+    s2 = "\\"
+    return s1[s1.index(s2) + len(s2):len(s1)-4]
+
+########################################
+# render to image
+# create an empty SVG XML element
+########################################
+def DrawEmptySVG():
+    # create an empty SVG XML element
+    doc = et.Element('svg', width='150', height='150', version='1.1', xmlns='http://www.w3.org/2000/svg')
+    # add a circle (using the SubElement function)
+    et.SubElement(doc, 'circle', cx='75', cy='75', r='70', fill='rgb(20, 255, 177)')
+    # add text
+    text = et.Element('text', x='75', y='75', fill='white', style='font-family:Courier;font-size:18px;text-anchor:middle;dominant-baseline:top')
+    print SVGline
+    text.text = 'no image'
+    doc.append(text)
+    # ElementTree 1.2 doesn't write the SVG file header errata, so do that manually
+    f = open('thumbnails/sample.svg', 'w')
+    f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
+    f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
+    f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
+    f.write(et.tostring(doc))
+    f.close()
+
+########################################
+# render to image
+# create an SVG XML element
+########################################
+def DrawSVG(SVGline, fileName):
+    f = open('thumbnails/'+fileName+'.svg', 'w')
+    f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
+    f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
+    f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
+    f.write('<svg height=\"150\" version=\"1.1\" width=\"150\" xmlns=\"http://www.w3.org/2000/svg\">\n')
+    f.write('<polygon points=\"'+SVGline+'\" style=\"fill:none; stroke:#00C; stroke-width:1.5px\"/>\n')
+    f.write('</svg>')
+    f.close()
 
 ########################################
 # extract vectors
@@ -25,9 +67,14 @@ def DisplayControlsPoints(pMesh):
         print("            Coordinates Y: %s" % lControlPoints[i][1])
         print("            Coordinates Z: %s" % lControlPoints[i][2])
         if i < lControlPointsCount-1 :
-            SVGline = SVGline + str(lControlPoints[i][0]) + "," + str(lControlPoints[i][1]) + ","
+            #SVGline = SVGline + str(lControlPoints[i][0]/lControlPoints[i][2]) + "," + str(lControlPoints[i][1]/lControlPoints[i][3]) + ","
+            if lControlPoints[i][3] > 0:
+                SVGline = SVGline + str(lControlPoints[i][0]/lControlPoints[i][2]) + "," + str(lControlPoints[i][1]/lControlPoints[i][3]) + ","
+            else:
+                SVGline = SVGline + str(lControlPoints[i][0]) + "," + str(lControlPoints[i][1]) + ","
 
     return SVGline[:-1]
+
 
 #temporary variables
 path = "C:\Python27\Scripts\WebFbx"
@@ -36,22 +83,25 @@ tmp_file_path = "files\cube.FBX";
 #tmp_file_path = "files\bat.fbx";
 #end temporary variables
 
-########################################
+
 # get files from FILES directory
-########################################
 found_files = glob.glob("files/*.fbx")
+print "FILES LIST: "
 for found_file in found_files:
-    print found_file
+    print "    %s" % found_file
     #tmp_file_path = found_file #process each file in FBX SDK
+
 
 ########################################
 # just doing one file to see how it goes, later will put it on function
 ########################################
 
+
 #creating instance (acess to C++ SDK) with a custom name
 manager = fbx.FbxManager.Create()
 importer = fbx.FbxImporter.Create(manager, "myImporter")
 status = importer.Initialize(tmp_file_path)
+
 
 #check if file is ok for load
 if status == False:
@@ -59,10 +109,12 @@ if status == False:
     #print importer.GetError()
     sys.exit()
 
+
 #import scene
 scene = fbx.FbxScene.Create(manager, "myScene")
 importer.Import(scene)
 importer.Destroy()
+
 
 #extract first node
 node = scene.GetRootNode()
@@ -99,52 +151,29 @@ else:
     print ("WARNING: no model information")
 
 
-########################################
-# render to image
-########################################
-# create an empty SVG XML element
-def DrawEmptySVG():
-    # create an empty SVG XML element
-    doc = et.Element('svg', width='150', height='150', version='1.1', xmlns='http://www.w3.org/2000/svg')
-    # add a circle (using the SubElement function)
-    et.SubElement(doc, 'circle', cx='75', cy='75', r='70', fill='rgb(20, 255, 177)')
-    # add text
-    text = et.Element('text', x='75', y='75', fill='white', style='font-family:Courier;font-size:18px;text-anchor:middle;dominant-baseline:top')
-    print SVGline
-    text.text = 'no image'
-    doc.append(text)
-    # ElementTree 1.2 doesn't write the SVG file header errata, so do that manually
-    f = open('thumbnails/sample.svg', 'w')
-    f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
-    f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
-    f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
-    f.write(et.tostring(doc))
-    f.close()
+#render to image
 
-# create an SVG XML element
-def DrawSVG(SVGline):
-    f = open('thumbnails/sample.svg', 'w')
-    f.write('<?xml version=\"1.0\" standalone=\"no\"?>\n')
-    f.write('<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n')
-    f.write('\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n')
-    f.write('<svg height=\"150\" version=\"1.1\" width=\"150\" xmlns=\"http://www.w3.org/2000/svg\">\n')
-    f.write('<polygon points=\"'+SVGline+'\" style=\"fill:none; stroke:#00C; stroke-width:1.5px\"/>\n')
-    f.write('</svg>')
-    f.close()
+DrawSVG(SVGline, SliceFileName(tmp_file_path))
+DrawEmptySVG()
 
 
-DrawSVG(SVGline)
-#DrawEmptySVG()
-
-########################################
 #shows up in HTML page reading it from thumbnails directory
-########################################
 thumbs = glob.glob('thumbnails/*.svg')
 
-with document(title='Thumbnails') as doc:
+with document(title='Web Fbx Thumbnails') as doc:
     h1('Thumbnails')
-    for path in thumbs:
-        div(img(src=path), _class='thumbnails')
+    with table().add(tbody()):
+        lh = tr()
+        lh.add(td('Title', style="width:20%"))
+        lh.add(td('File Name', style="width:40%"))
+        lh.add(td('Image', style="width:40%"))
+        for path in thumbs:
+            l = tr()
+            with l:
+                #p(td('teste'), td(tmp_file_path), td(img(src=path)))
+                l.add(td('teste'))
+                l.add(td(tmp_file_path))
+                l.add(td(img(src=path)))
 
 with open('gallery.html', 'w') as f:
     f.write(doc.render())

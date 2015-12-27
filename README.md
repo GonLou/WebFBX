@@ -42,7 +42,9 @@ It was used Atom 1.3.2 for its simplicity.
 #### 3.ii) Files
 
 #### 3.iii) Isometric
-
+The easiest way to plot 3D Points onto a 2D screen
+$$ \large{ screen.x = x / z * zoom
+screen.y = y / z * zoom }$$
 #### 3.iv) HTML
 
 ### 4. Conclusion
